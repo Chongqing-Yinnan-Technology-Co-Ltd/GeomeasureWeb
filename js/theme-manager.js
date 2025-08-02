@@ -104,11 +104,33 @@ class ThemeManager {
    * 更新主题切换按钮图标
    */
   updateThemeToggleIcon() {
-    if (!this.themeToggleButton) return;
+    // 重新获取按钮元素，防止DOM更新后引用失效
+    this.themeToggleButton = document.getElementById('theme-toggle');
+    if (!this.themeToggleButton) {
+      console.warn('Theme toggle button not found');
+      return;
+    }
     
     const icon = this.themeToggleButton.querySelector('.material-icons');
     if (icon) {
-      icon.textContent = this.currentTheme === 'light' ? 'dark_mode' : 'light_mode';
+      // 设置正确的图标
+      const iconName = this.currentTheme === 'light' ? 'dark_mode' : 'light_mode';
+      icon.textContent = iconName;
+      
+      // 确保图标可见
+      icon.style.opacity = '1';
+      icon.style.visibility = 'visible';
+      icon.style.display = 'inline-block';
+      
+      console.log(`Theme icon updated to: ${iconName}`);
+    } else {
+      console.warn('Theme toggle icon not found, creating new icon');
+      // 如果图标不存在，创建一个新的
+      const newIcon = document.createElement('span');
+      newIcon.className = 'material-icons';
+      newIcon.textContent = this.currentTheme === 'light' ? 'dark_mode' : 'light_mode';
+      this.themeToggleButton.innerHTML = '';
+      this.themeToggleButton.appendChild(newIcon);
     }
     
     // 更新按钮的aria-label

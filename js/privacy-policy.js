@@ -22,13 +22,45 @@ class PrivacyPolicyManager {
     const backButton = document.getElementById('back-button');
     if (backButton) {
       backButton.addEventListener('click', () => {
-        // 检查是否有上一页
-        if (window.history.length > 1) {
-          window.history.back();
-        } else {
-          // 如果没有上一页，可以跳转到应用主页或关闭窗口
-          window.close();
+        // 尝试通过postMessage通知Flutter应用关闭WebView
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: 'privacy_policy_close',
+              action: 'back'
+            }, '*');
+          }
+        } catch (e) {
+          console.log('PostMessage to parent failed:', e);
         }
+        
+        // 尝试通过Flutter WebView接口关闭
+        try {
+          if (window.flutter_inappwebview) {
+            window.flutter_inappwebview.callHandler('closeWebView');
+          }
+        } catch (e) {
+          console.log('Flutter WebView handler not available:', e);
+        }
+        
+        // 尝试使用其他可能的Flutter通信方式
+        try {
+          if (window.FlutterWebView) {
+            window.FlutterWebView.postMessage('close');
+          }
+        } catch (e) {
+          console.log('Flutter WebView postMessage not available:', e);
+        }
+        
+        // 备用方案：检查是否有上一页历史记录
+        setTimeout(() => {
+          if (window.history.length > 1 && document.referrer) {
+            window.history.back();
+          } else {
+            // 最后的备用方案：尝试关闭窗口
+            window.close();
+          }
+        }, 100);
       });
     }
   }
