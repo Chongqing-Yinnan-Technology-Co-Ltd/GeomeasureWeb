@@ -385,7 +385,7 @@ class LanguageManager {
         info_share_title: '3. 我们如何分享您的信息',
         info_share_intro: '我们不出售您的个人信息。我们仅在以下情况下与第三方分享您的信息：',
         third_party_title: 'A. 与第三方服务提供商',
-        third_party_content: '我们与第三方合作伙伴合作，帮助我们运营、提供、改进和营销我们的服务。这些合作伙伴有合同义务保护您的数据，并且仅限于将其用于我们指定的目的。我们可能与以下服务分享信息：<br><br><strong>分析和崩溃报告：</strong>帮助我们了解使用模式并修复错误。<br>示例：Google Analytics for Firebase, Firebase Crashlytics<br><br><strong>广告：</strong>在我们的应用中显示广告。这些服务可能收集设备标识符以显示个性化广告。您通常可以在设备设置中选择退出个性化广告。<br>示例：AdMob, Meta (Facebook), AppLovin, Vungle, ironSource, Pangle 等<br><br><strong>云托管：</strong>安全存储您的数据。<br>示例：Amazon Web Services (AWS)<br><br>这些第三方服务符合GDPR等主要数据保护法规。我们鼓励您查看他们的隐私政策以了解他们的数据处理做法。',
+        third_party_content: '我们与第三方合作伙伴合作，帮助我们运营、提供、改进和营销我们的服务。这些合作伙伴有合同义务保护您的数据，并且仅限于将其用于我们指定的目的。我们可能与以下服务分享信息：<br><br><strong>身份验证和用户管理：</strong>提供安全的用户登录和账户管理功能。<br>包括：Firebase Authentication, Google Sign-In, Facebook Login, Sign in with Apple<br><br><strong>分析和崩溃报告：</strong>帮助我们了解使用模式并修复错误。<br>包括：Google Analytics for Firebase, Firebase Crashlytics<br><br><strong>地图和位置服务：</strong>提供地图显示、位置搜索和地理定位功能。<br>包括：Google Maps API, Google Places API, 设备定位服务<br><br><strong>云存储和数据库：</strong>安全存储您的应用数据和设置。<br>包括：Google Cloud Platform (通过Firebase), 本地设备存储<br><br><strong>网络请求和通信：</strong>处理应用与服务器之间的安全通信。<br>包括：HTTP/HTTPS协议，SSL/TLS加密传输<br><br>这些第三方服务符合GDPR等主要数据保护法规。我们鼓励您查看他们的隐私政策以了解他们的数据处理做法。',
         legal_reasons_title: 'B. 出于法律原因和保护我们的权利',
         legal_reasons_content: '如果我们认为法律、传票或其他法律程序要求，或者我们有充分理由相信披露对于以下目的是合理必要的，我们可能会披露您的信息：(i) 保护任何人的安全，(ii) 解决欺诈、安全或技术问题，或 (iii) 保护我们的权利或财产。',
         with_consent_title: 'C. 经您同意',
@@ -422,7 +422,7 @@ class LanguageManager {
         info_share_title: '3. How We Share Your Information',
         info_share_intro: 'We do not sell your personal information. We only share your information with third parties in the following circumstances:',
         third_party_title: 'A. With Third-Party Service Providers',
-        third_party_content: 'We work with third-party partners to help us operate, provide, improve, and market our Services. These partners are contractually obligated to protect your data and are restricted to using it only for the purposes we specify. We may share information with services for:<br><br><strong>Analytics and Crash Reporting:</strong> To help us understand usage patterns and fix bugs.<br>Examples: Google Analytics for Firebase, Firebase Crashlytics<br><br><strong>Advertising:</strong> To display advertisements within our app. These services may collect device identifiers to show personalized ads. You can typically opt-out of personalized advertising in your device settings.<br>Examples: AdMob, Meta (Facebook), AppLovin, Vungle, ironSource, Pangle, etc.<br><br><strong>Cloud Hosting:</strong> To store your data securely.<br>Example: Amazon Web Services (AWS)<br><br>These third-party services are compliant with major data protection regulations like GDPR. We encourage you to review their privacy policies to understand their data practices.',
+        third_party_content: 'We work with third-party partners to help us operate, provide, improve, and market our Services. These partners are contractually obligated to protect your data and are restricted to using it only for the purposes we specify. We may share information with services for:<br><br><strong>Authentication and User Management:</strong> To provide secure user login and account management features.<br>Including: Firebase Authentication, Google Sign-In, Facebook Login, Sign in with Apple<br><br><strong>Analytics and Crash Reporting:</strong> To help us understand usage patterns and fix bugs.<br>Including: Google Analytics for Firebase, Firebase Crashlytics<br><br><strong>Maps and Location Services:</strong> To provide map display, location search, and geolocation features.<br>Including: Google Maps API, Google Places API, device location services<br><br><strong>Cloud Storage and Database:</strong> To securely store your app data and settings.<br>Including: Google Cloud Platform (through Firebase), local device storage<br><br><strong>Network Requests and Communication:</strong> To handle secure communication between the app and servers.<br>Including: HTTP/HTTPS protocols, SSL/TLS encrypted transmission<br><br>These third-party services are compliant with major data protection regulations like GDPR. We encourage you to review their privacy policies to understand their data practices.',
         legal_reasons_title: 'B. For Legal Reasons and to Protect Our Rights',
         legal_reasons_content: 'We may disclose your information if we believe it\'s required by law, subpoena, or other legal process, or if we have a good faith belief that disclosure is reasonably necessary to (i) protect the safety of any person, (ii) address fraud, security, or technical issues, or (iii) protect our rights or property.',
         with_consent_title: 'C. With Your Consent',
@@ -1260,12 +1260,20 @@ class LanguageManager {
    * 更新语言选择状态
    */
   updateLanguageSelection() {
+    console.log(`[DEBUG] updateLanguageSelection: 当前语言 = ${this.currentLanguage}`);
+    
     const languageOptions = document.querySelectorAll('.language-option');
-    languageOptions.forEach(option => {
+    console.log(`[DEBUG] updateLanguageSelection: 找到 ${languageOptions.length} 个语言选项`);
+    
+    languageOptions.forEach((option, index) => {
       const lang = option.getAttribute('data-lang');
       const checkIcon = option.querySelector('.material-icons');
+      const languageName = option.querySelector('.language-name')?.textContent || option.textContent;
+      
+      console.log(`[DEBUG] updateLanguageSelection: 选项${index} data-lang="${lang}" 名称="${languageName.trim()}"`);
       
       if (lang === this.currentLanguage) {
+        console.log(`[DEBUG] updateLanguageSelection: ✅ 匹配! 设置 ${languageName.trim()} 为选中状态`);
         // 添加选中样式
         option.classList.add('md3-surface-variant');
         // 显示勾选图标
@@ -1274,6 +1282,7 @@ class LanguageManager {
           checkIcon.style.color = 'var(--md-sys-color-primary)';
         }
       } else {
+        console.log(`[DEBUG] updateLanguageSelection: ❌ 不匹配 ${lang} !== ${this.currentLanguage}`);
         // 移除选中样式
         option.classList.remove('md3-surface-variant');
         // 隐藏勾选图标
