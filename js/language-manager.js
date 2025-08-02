@@ -13,7 +13,144 @@ class LanguageManager {
       'pt', 'ru', 'ar', 'hi', 'bn', 'ur', 'id'
     ];
     
+    this.initDebugConsole(); // 初始化调试控制台（手机端查看日志）
     this.init();
+  }
+  
+  /**
+   * 初始化页面内调试控制台（用于手机调试）
+   */
+  initDebugConsole() {
+    // 创建调试控制台容器
+    const debugConsole = document.createElement('div');
+    debugConsole.id = 'debug-console';
+    debugConsole.style.cssText = `
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 40vh;
+      background: rgba(0, 0, 0, 0.9);
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 10px;
+      overflow-y: auto;
+      z-index: 10000;
+      border-top: 2px solid #333;
+      display: none;
+    `;
+    
+    // 创建标题栏
+    const titleBar = document.createElement('div');
+    titleBar.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #333;
+    `;
+    
+    const title = document.createElement('span');
+    title.textContent = '🔧 语言检测调试日志';
+    title.style.color = '#ffffff';
+    title.style.fontWeight = 'bold';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '❌';
+    closeBtn.style.cssText = `
+      background: none;
+      border: none;
+      color: #ff6666;
+      cursor: pointer;
+      font-size: 16px;
+    `;
+    closeBtn.onclick = () => {
+      debugConsole.style.display = 'none';
+    };
+    
+    titleBar.appendChild(title);
+    titleBar.appendChild(closeBtn);
+    
+    // 创建日志内容区域
+    const logContent = document.createElement('div');
+    logContent.id = 'debug-log-content';
+    logContent.style.cssText = `
+      white-space: pre-wrap;
+      word-break: break-all;
+    `;
+    
+    debugConsole.appendChild(titleBar);
+    debugConsole.appendChild(logContent);
+    document.body.appendChild(debugConsole);
+    
+    // 创建显示调试控制台的按钮
+    const debugBtn = document.createElement('button');
+    debugBtn.textContent = '🔧';
+    debugBtn.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #ff6600;
+      color: white;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 9999;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    `;
+    debugBtn.onclick = () => {
+      debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+    };
+    document.body.appendChild(debugBtn);
+    
+    // 重写console.log来同时显示在页面上
+    const originalConsoleLog = console.log;
+    console.log = (...args) => {
+      originalConsoleLog.apply(console, args);
+      this.addDebugLog('LOG', args.join(' '));
+    };
+    
+    // 重写console.warn
+    const originalConsoleWarn = console.warn;
+    console.warn = (...args) => {
+      originalConsoleWarn.apply(console, args);
+      this.addDebugLog('WARN', args.join(' '), '#ffaa00');
+    };
+    
+    // 重写console.error
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+      originalConsoleError.apply(console, args);
+      this.addDebugLog('ERROR', args.join(' '), '#ff6666');
+    };
+  }
+  
+  /**
+   * 添加调试日志到页面显示
+   */
+  addDebugLog(level, message, color = '#00ff00') {
+    const logContent = document.getElementById('debug-log-content');
+    if (logContent) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('div');
+      logEntry.style.cssText = `
+        margin-bottom: 2px;
+        color: ${color};
+      `;
+      logEntry.innerHTML = `<span style="color: #888;">[${timestamp}]</span> <span style="color: #fff;">[${level}]</span> ${message}`;
+      logContent.appendChild(logEntry);
+      logContent.scrollTop = logContent.scrollHeight;
+      
+      // 限制日志条数，避免内存溢出
+      if (logContent.children.length > 100) {
+        logContent.removeChild(logContent.firstChild);
+      }
+    }
   }
 
   /**
