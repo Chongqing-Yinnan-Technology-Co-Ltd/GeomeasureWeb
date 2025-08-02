@@ -328,6 +328,7 @@ class LanguageManager {
     this.loadStoredLanguage();
     this.setupLanguageToggle();
     this.applyLanguage();
+    this.updateLanguageSelection(); // 初始化时更新语言选择状态
   }
 
   /**
@@ -1229,11 +1230,25 @@ class LanguageManager {
   updateLanguageSelection() {
     const languageOptions = document.querySelectorAll('.language-option');
     languageOptions.forEach(option => {
-      const lang = option.getAttribute('data-lang');
+      const lang = option.getAttribute('data-lang');  
+      const checkIcon = option.querySelector('.material-icons');
+      
       if (lang === this.currentLanguage) {
+        // 添加选中样式
         option.classList.add('md3-surface-variant');
+        // 显示勾选图标
+        if (checkIcon) {
+          checkIcon.style.opacity = '1';
+          checkIcon.style.color = 'var(--md-sys-color-primary)';
+        }
       } else {
+        // 移除选中样式  
         option.classList.remove('md3-surface-variant');
+        // 隐藏勾选图标
+        if (checkIcon) {
+          checkIcon.style.opacity = '0';
+          checkIcon.style.color = 'transparent';
+        }
       }
     });
   }
