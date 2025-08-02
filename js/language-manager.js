@@ -356,11 +356,19 @@ class LanguageManager {
    * 初始化语言管理器
    */
   init() {
+    console.log(`[DEBUG] init: 开始初始化语言管理器`);
     this.loadTranslations();
+    console.log(`[DEBUG] init: 完成加载翻译数据`);
     this.detectAppLanguage();
+    console.log(`[DEBUG] init: 完成检测应用语言`);
     this.loadStoredLanguage();
+    console.log(`[DEBUG] init: 完成加载存储语言`);
     this.setupLanguageToggle();
+    console.log(`[DEBUG] init: 完成设置语言切换按钮`);
     this.applyLanguage();
+    console.log(`[DEBUG] init: 完成应用语言`);
+    this.updateLanguageSelection();
+    console.log(`[DEBUG] init: 完成更新语言选择状态，当前语言 = ${this.currentLanguage}`);
   }
 
   /**
@@ -1171,20 +1179,28 @@ class LanguageManager {
    * 设置语言
    */
   setLanguage(lang) {
+    console.log(`[DEBUG] setLanguage: 输入语言 = ${lang}`);
     const normalizedLang = this.normalizeLanguageCode(lang);
+    console.log(`[DEBUG] setLanguage: 规范化后语言 = ${normalizedLang}`);
     
     // 如果有对应的翻译，使用该语言
     if (this.translations[normalizedLang]) {
       this.currentLanguage = normalizedLang;
+      console.log(`[DEBUG] setLanguage: ✅ 设置当前语言为 ${this.currentLanguage}`);
     } else {
       // 否则回退到英文
       console.warn(`Language '${normalizedLang}' not supported, falling back to English`);
       this.currentLanguage = 'en';
+      console.log(`[DEBUG] setLanguage: ❌ 回退到英文 ${this.currentLanguage}`);
     }
     
+    console.log(`[DEBUG] setLanguage: 调用 applyLanguage()`);
     this.applyLanguage();
+    console.log(`[DEBUG] setLanguage: 调用 saveLanguage()`);
     this.saveLanguage();
+    console.log(`[DEBUG] setLanguage: 调用 updateLanguageSelection()`);
     this.updateLanguageSelection();
+    console.log(`[DEBUG] setLanguage: 完成设置语言`);
   }
 
   /**
