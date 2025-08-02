@@ -947,11 +947,17 @@ class LanguageManager {
       
       // 检查路径中的第一个或最后一个段是否为语言代码
       for (const segment of pathSegments) {
-        console.log('检查路径段:', segment, '长度:', segment.length, '是否支持:', this.isLanguageSupported(segment));
-        if (segment.length <= 5 && this.isLanguageSupported(segment)) {
-          this.currentLanguage = this.normalizeLanguageCode(segment);
-          console.log('✅ 从URL路径检测到语言:', segment, '-> 规范化为:', this.currentLanguage);
-          return;
+        console.log('检查路径段:', segment, '长度:', segment.length);
+        // 只检查长度2-5个字符的段，排除项目名称等
+        if (segment.length >= 2 && segment.length <= 5) {
+          console.log('  -> 检查是否支持:', this.isLanguageSupported(segment));
+          if (this.isLanguageSupported(segment)) {
+            this.currentLanguage = this.normalizeLanguageCode(segment);
+            console.log('✅ 从URL路径检测到语言:', segment, '-> 规范化为:', this.currentLanguage);
+            return;
+          }
+        } else {
+          console.log('  -> 跳过（长度不符合语言代码规范）');
         }
       }
       console.log('❌ URL路径中未检测到语言代码');
