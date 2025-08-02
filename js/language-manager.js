@@ -632,6 +632,19 @@ class LanguageManager {
    */
   detectAppLanguage() {
     try {
+      // 方法0: 从URL路径获取语言设置 (支持 /zh/, /en/ 等路径)
+      const pathname = window.location.pathname;
+      const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
+      
+      // 检查路径中的第一个或最后一个段是否为语言代码
+      for (const segment of pathSegments) {
+        if (segment.length <= 5 && this.isLanguageSupported(segment)) {
+          this.currentLanguage = this.normalizeLanguageCode(segment);
+          console.log('Language detected from URL path:', segment, '-> normalized:', this.currentLanguage);
+          return;
+        }
+      }
+      
       // 方法1: 从URL参数获取语言设置
       const urlParams = new URLSearchParams(window.location.search);
       const langFromUrl = urlParams.get('lang') || urlParams.get('language');
