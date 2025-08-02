@@ -42,10 +42,14 @@
 
     <script>
         (function() {
+            console.log('404 Redirect - Current URL:', window.location.href);
+            
             // 从当前URL路径中提取语言代码
             function extractLanguageFromPath() {
                 const pathname = window.location.pathname;
                 const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
+                
+                console.log('404 Redirect - Path segments:', pathSegments);
                 
                 // 支持的语言代码列表
                 const supportedLanguages = [
@@ -56,32 +60,85 @@
                 // 检查路径段中是否包含语言代码
                 for (const segment of pathSegments) {
                     if (supportedLanguages.includes(segment)) {
+                        console.log('404 Redirect - Detected language:', segment);
                         return segment;
                     }
                 }
                 
+                console.log('404 Redirect - No language detected');
                 return null;
             }
             
             // 构建重定向URL
             function buildRedirectUrl() {
-                const baseUrl = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
                 const detectedLanguage = extractLanguageFromPath();
+                
+                // 构建正确的基础URL，去掉语言路径段和404.html
+                let basePath = window.location.pathname;
+                const pathSegments = basePath.split('/').filter(segment => segment.length > 0);
+                
+                console.log('404 Redirect - Original path segments:', pathSegments);
+                
+                // 移除检测到的语言段和404.html等文件名
+                let filteredSegments = pathSegments.filter(segment => {
+                    // 移除语言段
+                    if (detectedLanguage && segment === detectedLanguage) {
+                        return false;
+                    }
+                    // 移除HTML文件名
+                    if (segment.endsWith('.html')) {
+                        return false;
+                    }
+                    return true;
+                });
+                
+                console.log('404 Redirect - Filtered segments:', filteredSegments);
+                
+                // 构建基础路径
+                basePath = '/' + filteredSegments.join('/');
+                
+                // 确保路径以/结尾
+                if (!basePath.endsWith('/')) {
+                    basePath += '/';
+                }
+                
+                console.log('404 Redirect - Base path:', basePath);
+                
+                const baseUrl = window.location.origin + basePath;
                 
                 // 如果检测到语言，添加为URL参数
                 if (detectedLanguage) {
-                    return baseUrl + '/?lang=' + detectedLanguage;
+                    return baseUrl + '?lang=' + detectedLanguage;
                 } else {
-                    return baseUrl + '/';
+                    return baseUrl;
                 }
             }
             
-            // 立即重定向
-            const redirectUrl = buildRedirectUrl();
-            console.log('Redirecting from 404 to:', redirectUrl);
+            // 执行重定向
+            function performRedirect() {
+                const redirectUrl = buildRedirectUrl();
+                console.log('404 Redirect - Final URL:', redirectUrl);
+                
+                // 防止重定向循环：检查目标URL是否和当前URL相同
+                if (redirectUrl === window.location.href) {
+                    console.error('404 Redirect - Infinite loop detected, redirecting to root');
+                    window.location.replace(window.location.origin + '/GeomeasureWeb/');
+                    return;
+                }
+                
+                // 使用 replace 而不是 assign，避免产生历史记录
+                window.location.replace(redirectUrl);
+            }
             
-            // 使用 replace 而不是 assign，避免产生历史记录
-            window.location.replace(redirectUrl);
+            // 添加超时保护，如果3秒内没有重定向成功，提供手动链接
+            setTimeout(function() {
+                const manualLink = document.createElement('div');
+                manualLink.innerHTML = '<p><a href="' + window.location.origin + '/GeomeasureWeb/" style="color: #1976d2;">点击这里手动访问隐私政策页面</a></p>';
+                document.body.appendChild(manualLink);
+            }, 3000);
+            
+            // 立即执行重定向
+            performRedirect();
         })();
     </script>
 </body>
