@@ -18,42 +18,9 @@ class LanguageManager {
   }
   
   /**
-   * 检测是否为调试模式
-   */
-  isDebugMode() {
-    // 检查URL参数
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('debug') === 'true') {
-      return true;
-    }
-    
-    // 检查localStorage设置
-    if (localStorage.getItem('privacy_policy_debug') === 'true') {
-      return true;
-    }
-    
-    // 检查是否为本地开发环境
-    const isLocal = window.location.hostname === 'localhost' || 
-                   window.location.hostname === '127.0.0.1' ||
-                   window.location.port !== '';
-    
-    // 检查是否为开发者工具打开状态
-    const devToolsOpen = window.outerHeight - window.innerHeight > 200 ||
-                        window.outerWidth - window.innerWidth > 200;
-    
-    // 本地环境或开发者工具打开时显示调试控制台
-    return isLocal || devToolsOpen;
-  }
-  
-  /**
    * 初始化页面内调试控制台（用于手机调试）
    */
   initDebugConsole() {
-    // 检查是否为调试模式
-    if (!this.isDebugMode()) {
-      return; // 生产模式下不显示调试控制台
-    }
-    
     // 创建调试控制台容器
     const debugConsole = document.createElement('div');
     debugConsole.id = 'debug-console';
@@ -1283,6 +1250,7 @@ class LanguageManager {
     
     languageOptions.forEach((option, index) => {
       const lang = option.getAttribute('data-lang');
+<<<<<<< HEAD
       const checkIcon = option.querySelector('.material-icons');
       const languageName = option.querySelector('.language-name')?.textContent || option.textContent;
       
@@ -1291,21 +1259,17 @@ class LanguageManager {
       if (lang === this.currentLanguage) {
         console.log(`[DEBUG] updateLanguageSelection: ✅ 匹配! 设置 ${languageName.trim()} 为选中状态`);
         // 添加选中样式
+=======
+      if (lang === this.currentLanguage) {
+>>>>>>> parent of 4acd71f (🎨 修复Web隐私页面UI问题)
         option.classList.add('md3-surface-variant');
-        // 显示勾选图标
-        if (checkIcon) {
-          checkIcon.style.opacity = '1';
-          checkIcon.style.color = 'var(--md-sys-color-primary)';
-        }
       } else {
+<<<<<<< HEAD
         console.log(`[DEBUG] updateLanguageSelection: ❌ 不匹配 ${lang} !== ${this.currentLanguage}`);
         // 移除选中样式
+=======
+>>>>>>> parent of 4acd71f (🎨 修复Web隐私页面UI问题)
         option.classList.remove('md3-surface-variant');
-        // 隐藏勾选图标
-        if (checkIcon) {
-          checkIcon.style.opacity = '0';
-          checkIcon.style.color = 'transparent';
-        }
       }
     });
   }
