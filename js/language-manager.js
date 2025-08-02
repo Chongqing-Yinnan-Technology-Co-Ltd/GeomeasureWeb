@@ -57,21 +57,71 @@ class LanguageManager {
     title.style.color = '#ffffff';
     title.style.fontWeight = 'bold';
     
+    // 创建按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    `;
+    
+    // 复制日志按钮
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = '📋';
+    copyBtn.title = '复制所有日志';
+    copyBtn.style.cssText = `
+      background: none;
+      border: none;
+      color: #00ddff;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 5px;
+      border-radius: 3px;
+    `;
+    copyBtn.onclick = () => {
+      this.copyLogsToClipboard();
+    };
+    
+    // 清空日志按钮
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = '🗑️';
+    clearBtn.title = '清空日志';
+    clearBtn.style.cssText = `
+      background: none;
+      border: none;
+      color: #ffaa00;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 5px;
+      border-radius: 3px;
+    `;
+    clearBtn.onclick = () => {
+      this.clearDebugLogs();
+    };
+    
+    // 关闭按钮
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '❌';
+    closeBtn.title = '关闭调试控制台';
     closeBtn.style.cssText = `
       background: none;
       border: none;
       color: #ff6666;
       cursor: pointer;
       font-size: 16px;
+      padding: 2px 5px;
+      border-radius: 3px;
     `;
     closeBtn.onclick = () => {
       debugConsole.style.display = 'none';
     };
     
+    buttonContainer.appendChild(copyBtn);
+    buttonContainer.appendChild(clearBtn);
+    buttonContainer.appendChild(closeBtn);
+    
     titleBar.appendChild(title);
-    titleBar.appendChild(closeBtn);
+    titleBar.appendChild(buttonContainer);
     
     // 创建日志内容区域
     const logContent = document.createElement('div');
@@ -151,6 +201,122 @@ class LanguageManager {
         logContent.removeChild(logContent.firstChild);
       }
     }
+  }
+  
+  /**
+   * 复制所有调试日志到剪贴板
+   */
+  async copyLogsToClipboard() {
+    const logContent = document.getElementById('debug-log-content');
+    if (!logContent) {
+      this.showNotification('❌ 未找到日志内容', '#ff6666');
+      return;
+    }
+    
+    try {
+      // 提取所有日志文本
+      const logLines = [];
+      const logEntries = logContent.children;
+      
+      if (logEntries.length === 0) {
+        this.showNotification('📋 暂无日志可复制', '#ffaa00');
+        return;
+      }
+      
+      for (let i = 0; i < logEntries.length; i++) {
+        const entry = logEntries[i];
+        const text = entry.textContent || entry.innerText;
+        logLines.push(text);
+      }
+      
+      const logText = logLines.join('\n');
+      
+      // 尝试使用现代剪贴板API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(logText);
+        this.showNotification('✅ 日志已复制到剪贴板', '#00ff00');
+      } else {
+        // 回退到传统方法
+        const textArea = document.createElement('textarea');
+        textArea.value = logText;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          this.showNotification('✅ 日志已复制到剪贴板', '#00ff00');
+        } catch (err) {
+          this.showNotification('❌ 复制失败，请手动选择文本', '#ff6666');
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error('复制日志失败:', error);
+      this.showNotification('❌ 复制失败: ' + error.message, '#ff6666');
+    }
+  }
+  
+  /**
+   * 清空调试日志
+   */
+  clearDebugLogs() {
+    const logContent = document.getElementById('debug-log-content');
+    if (logContent) {
+      logContent.innerHTML = '';
+      this.showNotification('🗑️ 日志已清空', '#ffaa00');
+    }
+  }
+  
+  /**
+   * 显示操作通知
+   */
+  showNotification(message, color = '#00ff00') {
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      color: ${color};
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      z-index: 10001;
+      border: 1px solid ${color};
+      animation: fadeInOut 3s ease-in-out;
+    `;
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // 添加动画样式
+    if (!document.getElementById('notification-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'notification-keyframes';
+      style.textContent = `
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translateY(-10px); }
+          20% { opacity: 1; transform: translateY(0); }
+          80% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 3000);
   }
 
   /**
