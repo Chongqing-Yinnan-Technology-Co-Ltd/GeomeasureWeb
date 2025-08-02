@@ -632,33 +632,48 @@ class LanguageManager {
    */
   detectAppLanguage() {
     try {
+      console.log('=== 开始语言检测 ===');
+      console.log('当前URL:', window.location.href);
+      console.log('URL路径:', window.location.pathname);
+      console.log('URL参数:', window.location.search);
+      
       // 方法0: 从URL路径获取语言设置 (支持 /zh/, /en/ 等路径)
       const pathname = window.location.pathname;
       const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
+      console.log('路径段:', pathSegments);
       
       // 检查路径中的第一个或最后一个段是否为语言代码
       for (const segment of pathSegments) {
+        console.log('检查路径段:', segment, '长度:', segment.length, '是否支持:', this.isLanguageSupported(segment));
         if (segment.length <= 5 && this.isLanguageSupported(segment)) {
           this.currentLanguage = this.normalizeLanguageCode(segment);
-          console.log('Language detected from URL path:', segment, '-> normalized:', this.currentLanguage);
+          console.log('✅ 从URL路径检测到语言:', segment, '-> 规范化为:', this.currentLanguage);
           return;
         }
       }
+      console.log('❌ URL路径中未检测到语言代码');
       
       // 方法1: 从URL参数获取语言设置
       const urlParams = new URLSearchParams(window.location.search);
       const langFromUrl = urlParams.get('lang') || urlParams.get('language');
+      console.log('URL参数中的语言:', langFromUrl);
       if (langFromUrl && this.isLanguageSupported(langFromUrl)) {
         this.currentLanguage = this.normalizeLanguageCode(langFromUrl);
+        console.log('✅ 从URL参数检测到语言:', langFromUrl, '-> 规范化为:', this.currentLanguage);
         return;
       }
+      console.log('❌ URL参数中未检测到语言代码');
 
       // 方法2: 从postMessage获取Flutter应用的语言设置
       // Flutter应用可以通过postMessage发送当前语言
+      console.log('设置postMessage监听器...');
       window.addEventListener('message', (event) => {
+        console.log('收到postMessage:', event.data);
         if (event.data && event.data.type === 'flutter_language') {
           const flutterLang = event.data.language;
+          console.log('Flutter发送的语言:', flutterLang);
           if (flutterLang && this.isLanguageSupported(flutterLang)) {
+            console.log('✅ 从postMessage检测到语言:', flutterLang);
             this.setLanguage(this.normalizeLanguageCode(flutterLang));
           }
         }
@@ -667,17 +682,31 @@ class LanguageManager {
       // 方法3: 从localStorage获取Flutter应用的语言设置
       const flutterLang = localStorage.getItem('selected_locale') || 
                          localStorage.getItem('flutter_locale');
+      console.log('localStorage中的语言设置:');
+      console.log('  selected_locale:', localStorage.getItem('selected_locale'));
+      console.log('  flutter_locale:', localStorage.getItem('flutter_locale'));
+      console.log('  最终获取到:', flutterLang);
+      
       if (flutterLang && this.isLanguageSupported(flutterLang)) {
         this.currentLanguage = this.normalizeLanguageCode(flutterLang);
+        console.log('✅ 从localStorage检测到语言:', flutterLang, '-> 规范化为:', this.currentLanguage);
         return;
       }
+      console.log('❌ localStorage中未检测到语言代码');
 
       // 方法4: 检测浏览器语言
       const browserLang = navigator.language || navigator.languages[0];
+      console.log('浏览器语言:', browserLang);
+      console.log('浏览器支持的语言列表:', navigator.languages);
+      
       if (browserLang && this.isLanguageSupported(browserLang)) {
         this.currentLanguage = this.normalizeLanguageCode(browserLang);
+        console.log('✅ 从浏览器检测到语言:', browserLang, '-> 规范化为:', this.currentLanguage);
         return;
       }
+      console.log('❌ 浏览器语言不受支持或未检测到');
+      
+      console.log('🔄 所有语言检测方法都失败，使用默认语言:', this.currentLanguage);
 
     } catch (error) {
       console.warn('Failed to detect app language:', error);
@@ -688,16 +717,29 @@ class LanguageManager {
    * 检查语言是否受支持
    */
   isLanguageSupported(langCode) {
+    if (!langCode) {
+      console.log('isLanguageSupported: 语言代码为空');
+      return false;
+    }
+    
     const normalizedLang = this.normalizeLanguageCode(langCode);
-    return this.supportedLanguages.includes(normalizedLang) || 
-           this.translations[normalizedLang];
+    const isSupported = this.supportedLanguages.includes(normalizedLang) || 
+                       this.translations[normalizedLang];
+    
+    console.log(`isLanguageSupported: ${langCode} -> ${normalizedLang} -> ${isSupported ? '支持' : '不支持'}`);
+    return isSupported;
   }
 
   /**
    * 规范化语言代码
    */
   normalizeLanguageCode(langCode) {
-    if (!langCode) return 'en';
+    console.log(`normalizeLanguageCode: 输入 ${langCode}`);
+    
+    if (!langCode) {
+      console.log('normalizeLanguageCode: 输入为空，返回默认 en');
+      return 'en';
+    }
     
     // 处理特殊情况
     const langMap = {
@@ -714,17 +756,21 @@ class LanguageManager {
     };
 
     if (langMap[langCode]) {
+      console.log(`normalizeLanguageCode: 特殊映射 ${langCode} -> ${langMap[langCode]}`);
       return langMap[langCode];
     }
 
     // 提取主要语言代码
     const mainLang = langCode.split('-')[0].split('_')[0].toLowerCase();
+    console.log(`normalizeLanguageCode: 提取主语言代码 ${langCode} -> ${mainLang}`);
     
     // 检查是否在支持列表中
     if (this.supportedLanguages.includes(mainLang)) {
+      console.log(`normalizeLanguageCode: 支持列表中找到 ${mainLang}`);
       return mainLang;
     }
 
+    console.log(`normalizeLanguageCode: 未找到支持的语言，返回默认 en`);
     return 'en'; // 默认返回英文
   }
 
