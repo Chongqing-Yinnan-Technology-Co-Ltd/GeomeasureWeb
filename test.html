@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语言同步测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 10px 15px; }
+    </style>
+</head>
+<body>
+    <h1>Web端隐私页面语言同步测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 当前语言检测</h2>
+        <p>当前语言: <span id="current-lang">未初始化</span></p>
+        <p>支持的语言: <span id="supported-langs">加载中...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 语言切换测试</h2>
+        <button onclick="testLanguage('zh')">中文</button>
+        <button onclick="testLanguage('en')">English</button>
+        <button onclick="testLanguage('es')">Español</button>
+        <button onclick="testLanguage('fr')">Français</button>
+        <button onclick="testLanguage('ja')">日本語</button>
+        <button onclick="testLanguage('ko')">한국어</button>
+        <button onclick="testLanguage('ar')">العربية</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 翻译内容测试</h2>
+        <p>标题: <span id="test-title" data-i18n="privacy_policy_title">Loading...</span></p>
+        <p>语言选择: <span id="test-select" data-i18n="select_language">Loading...</span></p>
+        <p>生效日期: <span id="test-date" data-i18n="effective_date">Loading...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Flutter App语言同步测试</h2>
+        <p>模拟Flutter App语言设置:</p>
+        <button onclick="simulateFlutterLanguage('zh')">模拟Flutter设为中文</button>
+        <button onclick="simulateFlutterLanguage('en')">模拟Flutter设为英文</button>
+        <button onclick="simulateFlutterLanguage('ja')">模拟Flutter设为日文</button>
+        <button onclick="clearFlutterLanguage()">清除Flutter语言设置</button>
+    </div>
+    
+    <script src="js/language-manager.js"></script>
+    <script>
+        function testLanguage(lang) {
+            console.log('切换到语言:', lang);
+            if (window.languageManager) {
+                window.languageManager.setLanguage(lang);
+                updateDisplay();
+            }
+        }
+        
+        function simulateFlutterLanguage(lang) {
+            // 模拟Flutter通过localStorage传递语言设置
+            localStorage.setItem('selected_locale', lang);
+            localStorage.setItem('flutter_locale', lang);
+            
+            // 重新初始化语言管理器
+            window.languageManager = new LanguageManager();
+            updateDisplay();
+            
+            console.log('模拟Flutter应用语言设置为:', lang);
+        }
+        
+        function clearFlutterLanguage() {
+            localStorage.removeItem('selected_locale');
+            localStorage.removeItem('flutter_locale');
+            localStorage.removeItem('privacy-policy-language');
+            
+            // 重新初始化语言管理器
+            window.languageManager = new LanguageManager();
+            updateDisplay();
+            
+            console.log('清除Flutter语言设置，应该回退到默认英文');
+        }
+        
+        function updateDisplay() {
+            if (window.languageManager) {
+                document.getElementById('current-lang').textContent = window.languageManager.getCurrentLanguage();
+                document.getElementById('supported-langs').textContent = window.languageManager.supportedLanguages.join(', ');
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateDisplay, 100); // 等待语言管理器初始化
+        });
+    </script>
+</body>
+</html>
