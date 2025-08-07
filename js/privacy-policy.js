@@ -22,15 +22,124 @@ class PrivacyPolicyManager {
     const backButton = document.getElementById('back-button');
     if (backButton) {
       backButton.addEventListener('click', () => {
-        // 检查是否有上一页
-        if (window.history.length > 1) {
-          window.history.back();
-        } else {
-          // 如果没有上一页，可以跳转到应用主页或关闭窗口
-          window.close();
-        }
+        this.handleBackNavigation();
       });
     }
+  }
+
+  /**
+   * 处理返回导航
+   */
+  handleBackNavigation() {
+    try {
+      console.log('返回按钮被点击');
+      console.log('当前URL:', window.location.href);
+      console.log('Referrer:', document.referrer);
+      console.log('History length:', window.history.length);
+
+      // 方法1: 尝试使用URL scheme返回到app (Android/iOS)
+      if (this.isFromMobileApp()) {
+        console.log('检测到来自移动应用，尝试返回到app');
+        this.returnToApp();
+        return;
+      }
+
+      // 方法2: 检查是否有上一页历史记录
+      if (window.history.length > 1) {
+        console.log('使用浏览器历史记录返回');
+        window.history.back();
+        return;
+      }
+
+      // 方法3: 尝试关闭窗口/标签页（在某些浏览器中可能受限）
+      console.log('尝试关闭窗口');
+      if (window.opener) {
+        // 如果是弹出窗口，关闭自身
+        window.close();
+      } else {
+        // 尝试关闭标签页（现代浏览器通常会阻止）
+        window.close();
+        
+        // 如果关闭失败，显示提示
+        setTimeout(() => {
+          alert('请手动关闭此页面返回到应用');
+        }, 100);
+      }
+    } catch (error) {
+      console.error('返回导航失败:', error);
+      // 备用方案：显示提示信息
+      alert('请手动关闭此页面返回到应用');
+    }
+  }
+
+  /**
+   * 检测是否来自移动应用
+   */
+  isFromMobileApp() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isAndroid = userAgent.includes('android');
+    const isIOS = userAgent.includes('iphone') || userAgent.includes('ipad');
+    const isMobile = isAndroid || isIOS;
+    const hasAppParams = window.location.search.includes('lang=');
+    
+    console.log('移动设备检测:', {
+      userAgent,
+      isAndroid,
+      isIOS, 
+      isMobile,
+      hasAppParams
+    });
+
+    // 如果是移动设备且URL中有语言参数，可能来自app
+    return isMobile && hasAppParams;
+  }
+
+  /**
+   * 返回到移动应用
+   */
+  returnToApp() {
+    // 尝试使用自定义URL scheme返回到app
+    const appSchemes = [
+      'geomeasure://',
+      'com.geomeasure://',
+      'app://'
+    ];
+
+    for (const scheme of appSchemes) {
+      try {
+        console.log('尝试URL scheme:', scheme);
+        window.location.href = scheme;
+        
+        // 如果在短时间内没有跳转，说明scheme不可用
+        setTimeout(() => {
+          console.log('URL scheme可能不可用，尝试其他方法');
+        }, 500);
+        
+        break; // 只尝试第一个scheme
+      } catch (error) {
+        console.error('URL scheme失败:', scheme, error);
+      }
+    }
+
+    // 备用方案：尝试使用postMessage通知app
+    try {
+      if (window.parent && window.parent !== window) {
+        console.log('尝试向parent发送postMessage');
+        window.parent.postMessage({
+          type: 'privacy_policy_back',
+          action: 'close'
+        }, '*');
+      }
+    } catch (error) {
+      console.error('postMessage失败:', error);
+    }
+
+    // 最后的备用方案：在移动设备上尝试关闭
+    setTimeout(() => {
+      if (this.isFromMobileApp()) {
+        window.close();
+      }
+    }, 1000);
   }
 
   /**

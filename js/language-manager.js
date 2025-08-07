@@ -135,28 +135,9 @@ class LanguageManager {
     debugConsole.appendChild(logContent);
     document.body.appendChild(debugConsole);
     
-    // 创建显示调试控制台的按钮
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = '🔧';
-    debugBtn.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: #ff6600;
-      color: white;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      z-index: 9999;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    `;
-    debugBtn.onclick = () => {
-      debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
-    };
-    document.body.appendChild(debugBtn);
+    // 调试按钮已隐藏（生产环境）
+    // 如需调试，请在开发者工具中手动显示调试控制台
+    // 使用：document.getElementById('debug-console').style.display = 'block'
     
     // 重写console.log来同时显示在页面上
     const originalConsoleLog = console.log;
@@ -948,7 +929,18 @@ class LanguageManager {
       console.log('URL路径:', window.location.pathname);
       console.log('URL参数:', window.location.search);
       
-      // 方法0: 从URL路径获取语言设置 (支持 /zh/, /en/ 等路径)
+      // 方法1: 从URL参数获取语言设置（Flutter应用会传递lang参数，优先级最高）
+      const urlParams = new URLSearchParams(window.location.search);
+      const langFromUrl = urlParams.get('lang') || urlParams.get('language');
+      console.log('URL参数中的语言:', langFromUrl);
+      if (langFromUrl && this.isLanguageSupported(langFromUrl)) {
+        this.currentLanguage = this.normalizeLanguageCode(langFromUrl);
+        console.log('✅ 从URL参数检测到语言:', langFromUrl, '-> 规范化为:', this.currentLanguage);
+        return;
+      }
+      console.log('❌ URL参数中未检测到语言代码');
+      
+      // 方法2: 从URL路径获取语言设置 (支持 /zh/, /en/ 等路径)
       const pathname = window.location.pathname;
       const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
       console.log('路径段:', pathSegments);
@@ -969,19 +961,8 @@ class LanguageManager {
         }
       }
       console.log('❌ URL路径中未检测到语言代码');
-      
-      // 方法1: 从URL参数获取语言设置
-      const urlParams = new URLSearchParams(window.location.search);
-      const langFromUrl = urlParams.get('lang') || urlParams.get('language');
-      console.log('URL参数中的语言:', langFromUrl);
-      if (langFromUrl && this.isLanguageSupported(langFromUrl)) {
-        this.currentLanguage = this.normalizeLanguageCode(langFromUrl);
-        console.log('✅ 从URL参数检测到语言:', langFromUrl, '-> 规范化为:', this.currentLanguage);
-        return;
-      }
-      console.log('❌ URL参数中未检测到语言代码');
 
-      // 方法2: 从postMessage获取Flutter应用的语言设置
+      // 方法3: 从postMessage获取Flutter应用的语言设置
       // Flutter应用可以通过postMessage发送当前语言
       console.log('设置postMessage监听器...');
       window.addEventListener('message', (event) => {
@@ -996,7 +977,7 @@ class LanguageManager {
         }
       });
 
-      // 方法3: 从localStorage获取Flutter应用的语言设置
+      // 方法4: 从localStorage获取Flutter应用的语言设置
       const flutterLang = localStorage.getItem('selected_locale') || 
                          localStorage.getItem('flutter_locale');
       console.log('localStorage中的语言设置:');
@@ -1011,7 +992,7 @@ class LanguageManager {
       }
       console.log('❌ localStorage中未检测到语言代码');
 
-      // 方法4: 检测浏览器语言
+      // 方法5: 检测浏览器语言
       const browserLang = navigator.language || navigator.languages[0];
       console.log('浏览器语言:', browserLang);
       console.log('浏览器支持的语言列表:', navigator.languages);
