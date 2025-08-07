@@ -357,7 +357,7 @@ class LanguageManager {
         policy_changes_title: '8. 本隐私政策的变更',
         policy_changes_content: '我们可能会不时更新本隐私政策。如果我们进行重大变更，我们将通过应用、电子邮件通知您，或要求您在继续使用服务之前查看并接受新版本。',
         contact_title: '9. 联系我们',
-        contact_content: '如果您对本隐私政策有任何问题、疑虑或反馈，请随时联系我们。<br><br><strong>公司名称：</strong>重庆银南科技有限公司<br><strong>电子邮件：</strong><a href="mailto:sven775288@gmail.com" class="email-link">sven775288@gmail.com</a><br><strong>地址：</strong>中国重庆市两江新区鱼嘴镇河旭路172号5号楼2楼',
+        contact_content: '如果您对本隐私政策有任何问题、疑虑或反馈，请随时联系我们。<br><br><strong>公司名称：</strong>重庆隐南科技有限公司<br><strong>电子邮件：</strong><a href="mailto:sven775288@gmail.com" class="email-link">sven775288@gmail.com</a><br><strong>地址：</strong>中国重庆市两江新区鱼嘴镇河旭路172号5号楼2楼',
         terms_of_service: '服务条款',
         contact_us: '联系我们'
       },
